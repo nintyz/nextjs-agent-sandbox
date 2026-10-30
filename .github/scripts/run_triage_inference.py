@@ -170,7 +170,12 @@ def main() -> int:
     }).encode("utf-8")
     req = urllib.request.Request(
         endpoint, data=payload,
-        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "Authorization": f"Bearer {token}",
+        },
         method="POST")
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
