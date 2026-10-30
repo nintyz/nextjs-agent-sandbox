@@ -155,7 +155,12 @@ jobs:
         id: decide
         if: steps.marker.outputs.marker_present != 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          # Inference only: a fine-grained PAT with Models:read, stored
+          # as the MODELS_TOKEN repo secret. The workflow token
+          # returned a plain "OK" body from the inference endpoint in
+          # smoke runs #2-#6, so it is not used for this call. All
+          # other steps keep using github.token.
+          GH_TOKEN: ${{ secrets.MODELS_TOKEN }}
         run: |
           # run_triage_inference.py is WORKFLOW-OWNED base code. It:
           #  - reads SKILL.md, pr.json, pr.diff, and triage-output/*.json
