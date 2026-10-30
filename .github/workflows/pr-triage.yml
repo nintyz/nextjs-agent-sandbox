@@ -24,10 +24,9 @@
 #     comment job run a model, fetch a URL, or execute artifact
 #     contents. The comment job only validates text and posts it.
 #  6. Every third-party action MUST be pinned to a full 40-character
-#     commit SHA at freeze time. The tags in comments below identify
-#     the action; a floating tag must never be submitted. Replace
-#     <PIN-TO-SHA-AT-FREEZE> by resolving the release commit from the
-#     action's repository and recording it in REPRODUCE.md.
+#     commit SHA. The tags in comments below identify the action; a
+#     floating tag must never be submitted. Pinned 30 Oct 2026 from
+#     each action's v4/v5 tag; SHAs are recorded in REPRODUCE.md.
 #
 # Model / inference: the triage job does NOT use a full agent action
 # with its own GitHub API tools. All data gathering is done by trusted
@@ -88,13 +87,13 @@ jobs:
       INFERENCE_ENDPOINT: https://models.github.ai/inference/chat/completions
     steps:
       - name: Check out BASE branch only (never the PR head)
-        uses: actions/checkout@<PIN-TO-SHA-AT-FREEZE> # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Set up Python (scripts are Python 3, standard library only)
-        uses: actions/setup-python@<PIN-TO-SHA-AT-FREEZE> # v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.12"
 
@@ -189,7 +188,7 @@ jobs:
         # Without this condition, upload-artifact with
         # if-no-files-found: error would fail an otherwise correct noop.
         if: steps.marker.outputs.marker_present != 'true'
-        uses: actions/upload-artifact@<PIN-TO-SHA-AT-FREEZE> # v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: triage-comment
           path: triage-output/
@@ -212,13 +211,13 @@ jobs:
       actions: read         # ONLY to download the artifact from Job 1
     steps:
       - name: Check out BASE branch only (for the validator script)
-        uses: actions/checkout@<PIN-TO-SHA-AT-FREEZE> # v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ github.event.pull_request.base.sha }}
           persist-credentials: false
 
       - name: Download triage artifact
-        uses: actions/download-artifact@<PIN-TO-SHA-AT-FREEZE> # v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: triage-comment
           path: triage-output
