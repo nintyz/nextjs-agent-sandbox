@@ -175,7 +175,7 @@ def main() -> int:
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
             raw = resp.read()
-            print(f"inference response: status={resp.status} bytes={len(raw)}")
+            print(f"inference response: status={resp.status} bytes={len(raw)} body_preview={raw[:300]!r}")
             data = json.loads(raw)
     except urllib.error.HTTPError as exc:
         body = exc.read().decode("utf-8", "replace")[:300]
