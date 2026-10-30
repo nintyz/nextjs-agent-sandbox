@@ -1,0 +1,256 @@
+# DRAFT — Agent 6 (GitHub Actions Workflow Adapter), for Marley to merge.
+# STATUS: NOT run, NOT tested, NOT deployed. Do NOT copy into the submission
+# repo as-is until the VERIFICATION_CHECKLIST.md smoke test passes.
+# Engine: GitHub Actions (Aaron's decision, 30 Oct 2026). This replaces
+# Agent 3's GitHub Agentic Workflows draft. There is NO .lock.yml for
+# Actions — see README.md, section "Why there is no .lock.yml".
+#
+# HARD RULES FOR ANY FUTURE EDIT OF THIS FILE (breaking any one of them
+# breaks the fork-safety argument in README.md):
+#  1. Trigger stays pull_request_target. Never switch to pull_request
+#     for fork commenting (the token there is read-only for forks and
+#     the comment job would silently fail), and never add an issue
+#     trigger to this workflow (that is a different workflow).
+#  2. Never check out the PR head. Both jobs check out the BASE branch
+#     only (ref: github.event.pull_request.base.sha). Never check out
+#     the merge ref, the head ref, or a branch from the PR.
+#  3. Never execute code, scripts, or commands taken from the PR.
+#     PR title, body, diff, and comments are DATA, read from files
+#     by Python, never interpolated into a `run:` shell string.
+#  4. Never give the triage job a write permission, and never give the
+#     comment job any permission except pull-requests: write (for the
+#     comment) and actions: read (to download the artifact).
+#  5. Never post a comment from the triage job, and never let the
+#     comment job run a model, fetch a URL, or execute artifact
+#     contents. The comment job only validates text and posts it.
+#  6. Every third-party action MUST be pinned to a full 40-character
+#     commit SHA at freeze time. The tags in comments below identify
+#     the action; a floating tag must never be submitted. Replace
+#     <PIN-TO-SHA-AT-FREEZE> by resolving the release commit from the
+#     action's repository and recording it in REPRODUCE.md.
+#
+# Model / inference: the triage job does NOT use a full agent action
+# with its own GitHub API tools. All data gathering is done by trusted
+# base-branch steps before the model sees anything, and the model step
+# is a narrow inference call (see .github/scripts/run_triage_inference.py,
+# workflow-owned, not skill-owned). The model has no API token, no
+# shell, and no tools — it can only influence the draft comment text.
+# MODEL_NAME below is an EXAMPLE from GitHub Models documentation, not
+# a verified-available model. Replace it with the model that passes the
+# sandbox smoke test, and record the actual model from the run log in
+# DESIGN.md's bill of materials. If the inference endpoint does not
+# respond in the sandbox, REMOVE the inference step and use the dry-run
+# protocol (DRY_RUN_PROTOCOL_ACTIONS.md) — do not silently substitute
+# another endpoint, key, or action.
+
+name: PR triage agent
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+# Workflow-level defaults: no permissions unless a job declares them.
+permissions: {}
+
+# One lane per PR. Actions semantics, stated correctly: with
+# cancel-in-progress: false, a new run for the same PR QUEUES behind a
+# running run; it does not supersede a pending run. Duplicate comments
+# are therefore prevented by the marker check (triage job, early exit)
+# and the marker dedup check (comment job), NOT by cancellation.
+# A global single-lane group is deliberately NOT used: it would make
+# 300 PRs drain at one run at a time (see GOVERNANCE doc, Q3).
+concurrency:
+  group: pr-triage-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  # ------------------------------------------------------------------
+  # Job 1 — triage (read-only). Produces a comment artifact, or noop.
+  # It NEVER posts a comment, closes, merges, labels, or pushes.
+  # ------------------------------------------------------------------
+  triage:
+    name: Triage (read-only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read        # checkout of BASE branch only
+      pull-requests: read   # read PR metadata, diff, and comments via API
+      issues: read          # read a linked issue, if the snapshot names one
+      models: read          # ONLY for the inference call; remove if that step is removed
+    outputs:
+      decision: ${{ steps.decide.outputs.decision }}
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      # EXAMPLE ONLY — replace with the smoke-tested model (see header).
+      MODEL_NAME: openai/gpt-4o-mini
+      INFERENCE_ENDPOINT: https://models.github.ai/inference/chat/completions
+    steps:
+      - name: Check out BASE branch only (never the PR head)
+        uses: actions/checkout@<PIN-TO-SHA-AT-FREEZE> # v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Set up Python (scripts are Python 3, standard library only)
+        uses: actions/setup-python@<PIN-TO-SHA-AT-FREEZE> # v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch PR metadata and diff via API (data only, never executed)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" > pr.json
+          gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" \
+            -H "Accept: application/vnd.github.diff" > pr.diff
+          # Body is extracted by Python reading pr.json, so PR text
+          # never passes through shell interpolation at any step.
+          python3 -c "import json; open('body.txt','w').write(json.load(open('pr.json'))['body'] or '')"
+          # Author type and draft state come from pr.json, not from live
+          # badges. The golden-case snapshots remain the source of truth
+          # for evaluation; this step is the live-workflow equivalent.
+
+      - name: Early exit if a triage comment already exists (marker check)
+        id: marker
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, subprocess, sys
+          # Marker check reads API output only. It never runs PR text.
+          out = subprocess.run(
+              ["gh", "api",
+               f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{os.environ['PR_NUMBER']}/comments",
+               "--paginate"],
+              capture_output=True, text=True, check=False)
+          present = "<!-- pr-triage-agent -->" in out.stdout
+          print(f"marker_present={present}")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"marker_present={'true' if present else 'false'}\n")
+          PY
+
+      - name: Run deterministic skill scripts (base-branch scripts only)
+        if: steps.marker.outputs.marker_present != 'true'
+        run: |
+          mkdir -p triage-output
+          python3 .claude/skills/pr-triage/scripts/classify_diff.py --diff pr.diff > triage-output/classify.json
+          python3 .claude/skills/pr-triage/scripts/check_issue_link.py --body body.txt > triage-output/issue_link.json || true
+          # Author count for the LIVE workflow cannot use a golden
+          # snapshot; it is computed from the API author field in
+          # pr.json by the inference harness, and recorded as
+          # "live count, not snapshot count" in decision.json. For
+          # golden evaluation, the snapshot count (SKILL.md) governs.
+          python3 .claude/skills/pr-triage/scripts/count_author_open_prs.py --snapshot triage-output/author_snapshot.json > triage-output/author.json || echo '{"status":"could_not_run"}' > triage-output/author.json
+          # Template/label and SHA checks are NOT separate steps here:
+          # their inputs (frozen template, snapshot SHAs, author snapshot)
+          # are evaluation inputs, not live-run inputs. The inference
+          # harness (next step) runs them against the base template and
+          # event SHAs where those inputs exist, and records
+          # could_not_run where they do not — never invented as a pass
+          # (SKILL.md section 3). For golden evaluation, all five scripts
+          # run on the frozen snapshot, not on live API data.
+
+      - name: Apply skill filters and draft comment (inference, narrow)
+        id: decide
+        if: steps.marker.outputs.marker_present != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # run_triage_inference.py is WORKFLOW-OWNED base code. It:
+          #  - reads SKILL.md, pr.json, pr.diff, and triage-output/*.json
+          #  - runs any remaining script checks (template/label against
+          #    the base template if present, SHA where SHAs are supplied)
+          #    and writes their JSON to triage-output/ before any model call
+          #  - applies the SKILL.md section 2 filters (bot -> noop,
+          #    member -> noop unless workflow_touched, empty diff -> noop
+          #    for the live workflow; see README for the empty-diff
+          #    difference between skill text and live workflow)
+          #  - calls ONLY the inference endpoint in $INFERENCE_ENDPOINT
+          #    with temperature 0 and a token cap, and writes
+          #    triage-output/comment.md and triage-output/decision.json
+          #  - never passes GITHUB_TOKEN to the model, never executes
+          #    PR code, and never fetches any URL from PR text.
+          # If the endpoint fails, this step FAILS the job (not a silent
+          # noop): a missing comment is a visible failure, and the
+          # evaluation falls back to the dry-run protocol.
+          python3 .github/scripts/run_triage_inference.py \
+            --skill .claude/skills/pr-triage/SKILL.md \
+            --pr pr.json --diff pr.diff --scripts triage-output \
+            --members .github/triage-members.json \
+            --out triage-output/comment.md --decision triage-output/decision.json
+          DECISION=$(python3 -c "import json; print(json.load(open('triage-output/decision.json'))['decision'])")
+          echo "decision=$DECISION" >> "$GITHUB_OUTPUT"
+
+      - name: Upload comment artifact (comment text only, never code)
+        # Skipped on marker-dedup runs: no triage-output exists then,
+        # and Job 2 is skipped anyway because decision is not 'comment'.
+        # Without this condition, upload-artifact with
+        # if-no-files-found: error would fail an otherwise correct noop.
+        if: steps.marker.outputs.marker_present != 'true'
+        uses: actions/upload-artifact@<PIN-TO-SHA-AT-FREEZE> # v4
+        with:
+          name: triage-comment
+          path: triage-output/
+          retention-days: 90
+          if-no-files-found: error
+
+  # ------------------------------------------------------------------
+  # Job 2 — comment applier (the ONLY job that can write, and only a
+  # comment). It runs no model, fetches no URL, and executes nothing
+  # from the artifact. It validates text, then posts it — or skips.
+  # ------------------------------------------------------------------
+  comment:
+    name: Post comment (validated only)
+    needs: triage
+    if: needs.triage.outputs.decision == 'comment'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write  # ONLY to post one comment via gh pr comment
+      actions: read         # ONLY to download the artifact from Job 1
+    steps:
+      - name: Check out BASE branch only (for the validator script)
+        uses: actions/checkout@<PIN-TO-SHA-AT-FREEZE> # v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+
+      - name: Download triage artifact
+        uses: actions/download-artifact@<PIN-TO-SHA-AT-FREEZE> # v4
+        with:
+          name: triage-comment
+          path: triage-output
+
+      - name: Validate comment (size, footer, marker — fail, do not truncate)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # validate_comment.py is WORKFLOW-OWNED base code. It checks:
+          #  - exactly one comment.md, UTF-8 text, no NUL bytes
+          #  - length <= 1500 characters (ENFORCED here, not an instruction)
+          #  - footer "Automated triage — not a maintainer decision." present
+          #  - marker "<!-- pr-triage-agent -->" present
+          #  - no comment already posted with the marker (dedup; if one
+          #    appeared between Job 1 and Job 2, exit 0 with "skip")
+          # On validation failure it exits non-zero and NOTHING is posted.
+          # On dedup it exits 0 with SKIP=true and the next step is skipped.
+          python3 .github/scripts/validate_comment.py \
+            --comment triage-output/comment.md \
+            --repo "${{ github.repository }}" \
+            --pr "${{ github.event.pull_request.number }}" > validation.txt
+          cat validation.txt
+          if grep -q '^SKIP=true' validation.txt; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+        id: validate
+
+      - name: Post the single validated comment
+        if: steps.validate.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # --body-file passes the file path, not the comment text, so
+          # comment text is never interpolated into shell. PR number
+          # comes from the event (an integer), not from PR text.
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body-file triage-output/comment.md --repo "${{ github.repository }}"

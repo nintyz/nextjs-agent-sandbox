@@ -1,0 +1,14 @@
+# STUB — REPRESENTATIVE WORKFLOW FILE ONLY.
+# This file exists solely so workflow-file detection has a real
+# path under .github/workflows/ to find. It is NOT a triage workflow,
+# it does NOT run triage, and it is NOT Next.js CI content.
+# It may be kept in the sandbox for detection testing or removed
+# before freeze; if kept, its stub status must be disclosed in
+# REPRODUCE.md. Do not present it as project CI.
+name: STUB example-ci
+on: [push]
+jobs:
+  stub:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "stub — no real CI step"
