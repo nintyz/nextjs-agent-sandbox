@@ -168,3 +168,14 @@ filter reason was logged.
 | Agent posts no comment on a comment case | Filter misclassified the author class, or a script failed safe | Script stdout for that case; author-class snapshot note |
 | Duplicate comments on one PR | Retry after a timeout, or a second trigger event (e.g. `synchronize`) | Run log: how many runs fired for that PR; retry rule in workflow file |
 | Model version differs from baseline on rerun | Silent provider update (unpinned) or pin change | Run-log model field vs. baseline in `logs/drift/`; apply the drift protocol before relying on the new version |
+
+## Action SHA pins (resolved 30 Oct 2026, smoke-test stage)
+
+Resolved from each action repository's tag via the GitHub API:
+
+- actions/checkout@v4: 11d5960a326750d5838078e36cf38b85af677262
+- actions/setup-python@v5: a26af69be951a213d495a4c3e4e4022e16d87065
+- actions/upload-artifact@v4: ea165f8d65b6e75b540449e92b4886f43607fa02
+- actions/download-artifact@v4: d3f86a106a0bac45b974a628896c90dbdf5c8093
+
+These are the pins in `.github/workflows/pr-triage.yml` at smoke-test time.
