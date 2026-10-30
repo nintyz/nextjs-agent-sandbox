@@ -50,6 +50,7 @@ def load_json(path):
 def write_decision(path, decision, reason):
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"decision": decision, "reason": reason}, f, indent=2)
+    print(f"decision={decision} reason={reason}")
 
 
 def main() -> int:
@@ -173,8 +174,14 @@ def main() -> int:
         method="POST")
     try:
         with urllib.request.urlopen(req, timeout=120) as resp:
-            data = json.load(resp)
-    except (urllib.error.URLError, urllib.error.HTTPError, ValueError) as exc:
+            raw = resp.read()
+            print(f"inference response: status={resp.status} bytes={len(raw)}")
+            data = json.loads(raw)
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", "replace")[:300]
+        print(f"inference failed: HTTP {exc.code} {exc.reason} body={body!r}")
+        return 1
+    except (urllib.error.URLError, ValueError) as exc:
         print(f"inference failed: {exc}")
         return 1
     try:
