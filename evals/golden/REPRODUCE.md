@@ -179,3 +179,14 @@ Resolved from each action repository's tag via the GitHub API:
 - actions/download-artifact@v4: d3f86a106a0bac45b974a628896c90dbdf5c8093
 
 These are the pins in `.github/workflows/pr-triage.yml` at smoke-test time.
+
+## Dry-run result (2026-10-31)
+
+Live inference failed (HTTP 200, body `OK`, not JSON, for both
+workflow token and MODELS_TOKEN PAT), so the golden cases were
+run as a dry run per the protocol. Result after fixing
+`check_issue_link.py` to accept the full-repo form: 12 pass,
+0 fail. Transcripts are in `logs/transcripts/<case-id>/`,
+drafts in `actual_outputs/<case-id>.md`, full report in
+`logs/dry-run-report.md`. A dry run does not prove the Actions
+workflow would make the same decisions or enforce the same limits.
