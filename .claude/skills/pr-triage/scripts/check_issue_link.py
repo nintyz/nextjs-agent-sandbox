@@ -10,8 +10,10 @@ that field is null, never guessed.
 
 A closing link is: fixes|fix|fixed|closes|close|closed|resolves|
 resolve|resolved, followed by whitespace and #<digits>, case-insensitive
-(e.g. "Fixes #123", "closes #45"). A bare "#123" with no such keyword
-is reported separately as a bare mention and does NOT count as a link.
+(e.g. "Fixes #123", "closes #45"), or the same keyword followed by a
+full-repo form owner/repo#<digits> (e.g. "Fixes vercel/next.js#92919").
+A bare "#123" with no such keyword is reported separately as a bare
+mention and does NOT count as a link.
 
 Output: exactly one JSON object on stdout. Exit 0 = check ran (an empty
 body is a valid run: has_issue_link=false, empty_body=true). Exit 2 =
@@ -24,7 +26,7 @@ import sys
 
 VERSION = "1.0.0"
 CLOSING_RE = re.compile(
-    r"\b(?:fix|fixes|fixed|close|closes|closed|resolve|resolves|resolved)\s+#(\d+)\b",
+    r"\b(?:fix|fixes|fixed|close|closes|closed|resolve|resolves|resolved)\s+(?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)#|#)(\d+)\b",
     re.IGNORECASE)
 BARE_RE = re.compile(r"#(\d+)\b")
 
@@ -72,7 +74,9 @@ def main(argv):
     closing = []
     for m in CLOSING_RE.finditer(body):
         closing.append({"keyword": m.group(0).split()[0].lower(),
-                        "issue_number": int(m.group(1))})
+                        "issue_number": int(m.group(2)),
+                        "form": "full-repo" if m.group(1) else "bare",
+                        "repo": m.group(1)})
     closing_numbers = sorted({c["issue_number"] for c in closing})
     bare = sorted({int(n) for n in BARE_RE.findall(body)} - set(closing_numbers))
     result = {
