@@ -1,6 +1,9 @@
-# DRAFT — Agent 6 (GitHub Actions Workflow Adapter), for Marley to merge.
-# STATUS: NOT run, NOT tested, NOT deployed. Do NOT copy into the submission
-# repo as-is until the VERIFICATION_CHECKLIST.md smoke test passes.
+# PR triage workflow — submission version.
+# STATUS: live inference is unproven (see DESIGN.md §7). The workflow
+# below is the configuration as evaluated by dry run on 31 Oct 2026;
+# the inference step is retained as written, and its failure mode is
+# documented, not hidden. If the endpoint is replaced, the golden
+# cases must be rerun before the new version is relied on.
 # Engine: GitHub Actions (Aaron's decision, 30 Oct 2026). This replaces
 # Agent 3's GitHub Agentic Workflows draft. There is NO .lock.yml for
 # Actions — see README.md, section "Why there is no .lock.yml".
@@ -35,12 +38,10 @@
 # workflow-owned, not skill-owned). The model has no API token, no
 # shell, and no tools — it can only influence the draft comment text.
 # MODEL_NAME below is an EXAMPLE from GitHub Models documentation, not
-# a verified-available model. Replace it with the model that passes the
-# sandbox smoke test, and record the actual model from the run log in
-# DESIGN.md's bill of materials. If the inference endpoint does not
-# respond in the sandbox, REMOVE the inference step and use the dry-run
-# protocol (DRY_RUN_PROTOCOL_ACTIONS.md) — do not silently substitute
-# another endpoint, key, or action.
+# a verified-available model. No model was ever recorded from a
+# successful run log, because every smoke run failed at inference
+# (see DESIGN.md §7). Do not silently substitute another endpoint,
+# key, or action without rerunning the golden cases.
 
 name: PR triage agent
 
@@ -82,7 +83,7 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       BASE_SHA: ${{ github.event.pull_request.base.sha }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      # EXAMPLE ONLY — replace with the smoke-tested model (see header).
+      # EXAMPLE ONLY — not a smoke-tested model (see header).
       MODEL_NAME: openai/gpt-4o-mini
       INFERENCE_ENDPOINT: https://models.github.ai/inference/chat/completions
     steps:
