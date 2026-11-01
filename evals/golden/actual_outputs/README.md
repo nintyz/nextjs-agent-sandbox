@@ -1,1 +1,1 @@
-Actual agent outputs go here after a run, one file per case, compared case by case against `expected_outputs/`. No actual outputs exist yet.
+Actual agent outputs are here, one file per case, compared case by case against `expected_outputs/`. Filter cases contain a filter log line instead of a comment.
