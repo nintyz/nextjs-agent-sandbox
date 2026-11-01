@@ -142,9 +142,9 @@ and the A1 sandbox issue-list verification (draft-level pass only).
 
 ## 8. AI-use statement
 
-Aaron wrote the Assignment 2 analysis and made the setup decisions
+I wrote the Assignment 2 analysis and made the setup decisions
 (private sandbox, GitHub Actions, dry run if inference failed). The
 workflow, skill, scripts, governance text and this document were
-drafted with AI assistance. He verified them against the brief, the
+drafted with AI assistance. I verified them against the brief, the
 workflow file and the locked golden cases, corrected the errors
-found in verification, and is responsible for the submitted work.
+found in verification, and am responsible for the submitted work.
