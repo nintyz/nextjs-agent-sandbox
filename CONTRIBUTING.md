@@ -1,10 +1,9 @@
-# Contributing — AI-use notes for this sandbox (DRAFT)
+# Contributing — AI-use notes for this sandbox
 
-> DRAFT — Agent 4, for Marley to merge. This is the sandbox
-> contributor-facing note only. It does not replace upstream
-> `contributing.md` in vercel/next.js, and it does not state any
-> workflow permission: permissions are enforced in the workflow,
-> not by this document (see `CONTRIBUTING-AI-POLICY-SCOPE.md`).
+> This is the sandbox contributor-facing note only. It does not
+> replace upstream `contributing.md` in vercel/next.js, and it does
+> not state any workflow permission: permissions are enforced in
+> the workflow, not by this document.
 
 ## What contributors are responsible for
 
