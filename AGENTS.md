@@ -1,9 +1,8 @@
 # AGENTS.md — Sandbox repository (representative subset of vercel/next.js)
 
-> DRAFT — Agent 4 (Skill and Scripts Designer), for Marley to merge.
-> Status: design draft only. Not deployed to vercel/next.js. Engine
-> choice (see plan §3) is still pending; nothing in this file depends
-> on that choice.
+> Status: submission version. Not deployed to vercel/next.js. Engine:
+> GitHub Actions (decided 30 Oct 2026). Nothing in this file depends
+> on a different engine choice.
 >
 > Scope rule for this whole file: repository facts only. No procedure
 > is defined here, and no judgement rule is defined here. Procedure
@@ -28,8 +27,6 @@
   any secret-bearing CI. That omission does not change a triage
   decision, because triage here judges only the PR text, the changed
   file list, and frozen snapshot data — it never builds PR code.
-- Every stub in this sandbox is labelled as a stub in its own header.
-  No stub is a copy of upstream source.
 
 ## 2. Sandbox layout
 
@@ -44,9 +41,6 @@ CONTRIBUTING.md             # contributor-facing AI policy (scope in §6 below)
 DESIGN.md                   # design justification, max 150 lines (separate workstream)
 evals/golden/
   cases/ inputs/ expected_outputs/ actual_outputs/ logs/ REPRODUCE.md
-docs/                       # representative docs tree (stub docs, labelled as stubs)
-packages/example-package/   # representative source path (stub, labelled as a stub)
-.github/workflows/          # representative workflow stub (labelled as a stub)
 ```
 
 Upstream layout, for reference only (not all present in the sandbox):
@@ -107,7 +101,7 @@ in the frozen snapshot.
 
 - No Rust/SWC compilation, no `pnpm build` of `packages/next`, no
   deploy test, no preview tarball. If a future sandbox change needs
-  a real build, that is a new scope decision for Marley, not
+  a real build, that is a new scope decision, not
   something this file authorises.
 
 ## 4. Conventions (repository facts, not triage procedure)
@@ -165,10 +159,9 @@ may decide — permitted actions are set by workflow permissions:
   workflow/governance workstream.
 - Skill (`.claude/skills/pr-triage/SKILL.md` plus `scripts/`):
   the step-by-step procedure and the deterministic checks.
-- `CONTRIBUTING.md`: contributor-facing AI policy only — see the
-  scope note in `CONTRIBUTING-AI-POLICY-SCOPE.md` in this draft
-  folder. Workflow permissions are not duplicated there as policy
-  sentences.
+- `CONTRIBUTING.md`: contributor-facing AI policy only — see the scope note in
+  `CONTRIBUTING.md`. Workflow permissions are not duplicated
+  there as policy sentences.
 - This file deliberately contains no step-by-step procedure, no
   "if X then comment Y" judgement rule, and no permission claim.
   Any such sentence found here during review is a defect to be
