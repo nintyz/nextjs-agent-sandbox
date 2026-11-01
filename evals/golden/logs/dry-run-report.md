@@ -6,16 +6,16 @@ Recorded reason: the GitHub Actions workflow inference endpoint
 (`https://models.github.ai/inference/chat/completions`, model
 `openai/gpt-4o-mini`) returned HTTP 200 with body exactly `OK`
 (4 bytes, not JSON) in smoke-test runs, for both the workflow
-`GITHUB_TOKEN` (with `models: read`) and a `MODELS_TOKEN` personal
+`GITHUB_TOKEN` (with `models: read`) and a personal
 access token with Models:read, across smoke PRs #2–#6 in the private
-sandbox `nintyz/nextjs-agent-sandbox`. Adding GitHub API
+the private sandbox repository. Adding GitHub API
 Accept/version headers did not change the response. The script
 therefore fails parsing before any decision or comment is produced.
 Token type is ruled out as the cause; the inference request as
 drafted does not reach the model path.
 
-Date the switch was approved: 2026-10-31 (Aaron approved switching
-to dry run after the PAT test on 2026-10-31 00:14 SGT returned the
+Date the switch was approved: 2026-10-31 (switching to dry run
+was approved after the token test on 2026-10-31 00:14 SGT returned the
 identical `OK` body).
 
 This dry run was performed 2026-10-31, local files only. Nothing
