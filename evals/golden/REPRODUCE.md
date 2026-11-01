@@ -19,7 +19,7 @@ commit containing this file). Later commits are not marked.
 ## 1. Prerequisites
 
 - A GitHub account with access to the sandbox repository
-  (`nintyz/nextjs-agent-sandbox`). No access to `vercel/next.js`
+  (the private sandbox repository submitted with this assignment). No access to `vercel/next.js`
   is needed or used.
 - Workflow engine: GitHub Actions, workflow
   `.github/workflows/pr-triage.yml`. There is no `.lock.yml`:
@@ -34,7 +34,7 @@ commit containing this file). Later commits are not marked.
 - For the deterministic scripts only: Python 3, standard library
   only. No model, no API key, no paid access is needed to
   reproduce the script results.
-- For end-to-end reruns: the same student/free access as the
+- For end-to-end reruns: the same free access as the
   original run, or the dry-run route in §5. No cost is quoted as
   measured: the private-repo runner minutes and any model cost
   were never measured from a successful live run.
@@ -210,7 +210,7 @@ These are the pins in `.github/workflows/pr-triage.yml` at smoke-test time.
 ## Dry-run result (2026-10-31)
 
 Live inference failed (HTTP 200, body `OK`, not JSON, for both
-workflow token and MODELS_TOKEN PAT), so the golden cases were
+workflow token and a token with Models:read), so the golden cases were
 run as a dry run per the protocol. Result after fixing
 `check_issue_link.py` to accept the full-repo form: 12 pass,
 0 fail. Transcripts are in `logs/transcripts/<case-id>/`,
