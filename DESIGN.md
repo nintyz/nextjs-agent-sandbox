@@ -1,4 +1,4 @@
-# DESIGN.md — DRAFT, not the submission freeze
+# DESIGN.md
 
 Sandbox: `nintyz/nextjs-agent-sandbox` (private). Target:
 `vercel/next.js`. Engine: GitHub Actions, workflow
@@ -11,12 +11,11 @@ triage: read a newly opened or updated PR, run deterministic checks,
 judge only what a script cannot judge, and post at most one comment.
 At the Assignment 2 freeze (15 Oct 2026), `vercel/next.js` had 2,571
 open PRs against 1,100 open issues (2.34:1). In the 27-PR stratified
-sample, first-time external PRs waited 24 hours to 69 days for a
-first human response; the longest merge decision, 185 days for
-#92646, was regular external. Medians were 0.75 days (internal
-member) and 0.4 days (coding-agent), reported separately. The
-sample is stratified, not a census, so these figures establish
-a triage bottleneck, not a precise queue forecast.
+sample, first-time external PRs waited 24 hours to 69 days for a first
+human response; the longest merge decision, 185 days for #92646, was
+regular external. Medians were 0.75 days (internal member) and 0.4 days
+(coding-agent), reported separately. The sample is stratified, not a
+census, so these figures establish a triage bottleneck, not a forecast.
 
 ## 2. Why an agent, alternative rejected, deliberately prevented
 
@@ -58,7 +57,7 @@ proposed only. All controls below are proposed only at scaffold stage.
   No enforced per-run credit cap exists in Actions; private-repo
   runner minutes are a second, unmeasured budget. Proposed only.
 - Audit trail: Actions run logs, mirrored into `evals/golden/logs/`.
-  Cost is reported only if the platform reports it. Proposed only.
+  Cost only if the platform reports it. Proposed only.
 - Kill switch: disable the workflow, then cancel each running run.
   Disabling alone does not cancel in-flight runs. Untested.
 - Drift detection: rerun all 12 golden cases on every model change;
@@ -139,12 +138,13 @@ inference endpoint itself. A dry run does not prove the
 workflow would make the same decisions. Still unresolved:
 Aaron's actual credit allowance, trivial-rule and queue-comment
 coverage lost in the locked set, phone-only kill-switch test,
-and the A1 sandbox issue-list verification (draft-level pass
-only, no fixture issues were created).
+and the A1 sandbox issue-list verification (draft-level pass only).
 
-## 8. AI-use statement — DRAFT, for Aaron to confirm in his own words
+## 8. AI-use statement
 
-Aaron wrote the Assignment 2 analysis and the setup decisions.
-AI-generated drafts were verified against the brief, the workflow
-file, and the locked golden cases before any run. Aaron must
-confirm or correct this statement before submission.
+Aaron wrote the Assignment 2 analysis and made the setup decisions
+(private sandbox, GitHub Actions, dry run if inference failed). The
+workflow, skill, scripts, governance text and this document were
+drafted with AI assistance. He verified them against the brief, the
+workflow file and the locked golden cases, corrected the errors
+found in verification, and is responsible for the submitted work.
