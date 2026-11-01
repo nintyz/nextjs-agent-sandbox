@@ -8,9 +8,9 @@ not `vercel/next.js` and must not be presented as a copy of it.
 Upstream reference: Assignment 2 data freeze, 15 October 2026,
 canary HEAD `10c5a6a`.
 
-## Status: submission freeze candidate
+## Status:
 
-- Engine: GitHub Actions (Aaron's decision, 30 Oct 2026).
+- Engine: GitHub Actions.
   Workflow: `.github/workflows/pr-triage.yml` (two jobs: read-only
   triage, comment-only applier). There is no `.lock.yml`, because a
   lockfile is a GitHub Agentic Workflows artefact and Actions has no
@@ -18,7 +18,7 @@ canary HEAD `10c5a6a`.
 - Golden cases: locked 30 Oct 2026 (11 historical + 1 adversarial).
   See `evals/golden/expected_outputs/` for expected outcomes written
   before any agent run, and `evals/golden/REPRODUCE.md`.
-- Evaluation: live inference failed (see DESIGN.md §7), so the
+- Evaluation: live inference failed (see DESIGN.md), so the
   golden cases were run as a dry run on 31 Oct 2026: 12 pass, 0 fail
   after one script fix. Transcripts are in
   `evals/golden/logs/transcripts/`, drafts in
@@ -29,9 +29,6 @@ canary HEAD `10c5a6a`.
   `evals/golden/inputs/README.md`. Opening diffs for multi-commit
   PRs could not be proven from commit dates and are flagged there,
   not silently presented as proven.
-- Action SHA pins: resolved 30 Oct 2026 and present in the workflow.
-- Before submitting: add `ctreude` as a collaborator on the private
-  repository, then submit the link to the frozen commit via eLearn.
 
 ## What the agent does and does not do
 
