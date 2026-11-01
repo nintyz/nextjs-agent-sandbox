@@ -1,6 +1,6 @@
 # DESIGN.md
 
-Sandbox: `nintyz/nextjs-agent-sandbox` (private). Target:
+Sandbox: private sandbox repository. Target:
 `vercel/next.js`. Engine: GitHub Actions, workflow
 `.github/workflows/pr-triage.yml`. Under the 150-line limit.
 
@@ -61,11 +61,11 @@ proposed only. All controls below are proposed only at scaffold stage.
 - Kill switch: disable the workflow, then cancel each running run.
   Disabling alone does not cancel in-flight runs. Untested.
 - Drift detection: rerun all 12 golden cases on every model change;
-  every changed output is reviewed by Aaron; a failing case blocks
+  every changed output is reviewed by the author; a failing case blocks
   reliance on the new version. Proposed only.
-- Accountability: sandbox owner/admin is Aaron; change and disable
-  authority sits with Aaron. Upstream Vercel maintainers have not
-  approved anything. Proposed only.
+- Accountability: sandbox owner/admin is the author; change and
+  disable authority sits with the author. Upstream maintainers
+  have not approved anything. Proposed only.
 
 Untrusted inputs: PR title, body, comments, diff, file contents,
 linked-issue text, and tool output. After a worst-case tool
@@ -87,8 +87,7 @@ and bounded run time, not closure, merge, or file changes.
 3. The project receives 300 issues in one week. Literally, 300
    issues plus 0 PRs means 0 triage runs, 0 comments, and 0 model
    cost. For 300 PR-equivalent events, the binding limit is the
-   credit allowance, unmeasured until Aaron's billing numbers are
-   confirmed. Policy on exhaustion: defer, not drop — later PRs
+   credit allowance, unmeasured. Policy on exhaustion: defer, not drop — later PRs
    are logged as credit-deferred and left for human triage.
 4. A tool or MCP server returns malicious instructions. No custom
    or external MCP server is configured, and the model step has no
@@ -115,15 +114,16 @@ and bounded run time, not closure, merge, or file changes.
 - Data sources: frozen golden snapshots at PR opening timestamps.
 - Logs: Actions run logs, mirrored into `evals/golden/logs/`.
 - Evaluations: 11 historical + 1 adversarial, in `evals/golden/`.
-- Responsible humans: Aaron (sandbox owner, evaluator, kill-switch
-  holder). `ctreude` is marking access only, not an agent role.
+- Responsible humans: the author (sandbox owner, evaluator,
+  kill-switch holder). The marker has read access only, not an
+  agent role.
 
 ## 7. Tests revealed and what remains unresolved
 
 Smoke test, 30-31 Oct 2026: draft PR #1 succeeded (draft filter,
 no comment). Docs PRs #2-#6 failed at the inference step: the
 endpoint returned HTTP 200 with body `OK` (4 bytes, not JSON)
-for both the workflow token and a MODELS_TOKEN PAT, so no
+for both the workflow token and a token with Models:read, so no
 comment was ever drafted. Inference is therefore unproven, and
 the workflow was NOT tested end-to-end. Dry run, 31 Oct 2026:
 12/12 golden cases pass after fixing `check_issue_link.py` to
@@ -136,9 +136,9 @@ timeout kills, model pinning/cost, audit-trail format,
 kill-switch cancellation, CODEOWNERS enforcement, and the
 inference endpoint itself. A dry run does not prove the
 workflow would make the same decisions. Still unresolved:
-Aaron's actual credit allowance, trivial-rule and queue-comment
-coverage lost in the locked set, phone-only kill-switch test,
-and the A1 sandbox issue-list verification (draft-level pass only).
+trivial-rule and queue-comment coverage lost in the locked set,
+phone-only kill-switch test, and the A1 sandbox issue-list
+verification (draft-level pass only).
 
 ## 8. AI-use statement
 
