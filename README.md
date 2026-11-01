@@ -8,7 +8,7 @@ not `vercel/next.js` and must not be presented as a copy of it.
 Upstream reference: Assignment 2 data freeze, 15 October 2026,
 canary HEAD `10c5a6a`.
 
-## Status: initial scaffold, not the submission freeze
+## Status: submission freeze candidate
 
 - Engine: GitHub Actions (Aaron's decision, 30 Oct 2026).
   Workflow: `.github/workflows/pr-triage.yml` (two jobs: read-only
@@ -18,18 +18,20 @@ canary HEAD `10c5a6a`.
 - Golden cases: locked 30 Oct 2026 (11 historical + 1 adversarial).
   See `evals/golden/expected_outputs/` for expected outcomes written
   before any agent run, and `evals/golden/REPRODUCE.md`.
-- Input snapshots for multi-commit PRs are not yet reconstructed in
-  this scaffold. They must be reconstructed as of each PR's opening
-  timestamp from commits dated at or before opening, and must not
-  silently use the current file list. See `evals/golden/inputs/README.md`.
-- Freeze blockers, not yet done: SHA pins for every third-party action
-  in the workflow (placeholders must be replaced at freeze and the
-  smoke test re-run), GitHub Models inference endpoint smoke test,
-  Aaron's actual Copilot/Student plan and allowance from his billing
-  page, `ctreude` added as a collaborator before submission, and
-  Aaron's confirmation of the AI-use statement in `DESIGN.md`.
-- Every stub in this scaffold is labelled as a stub in its own header.
-  No stub is upstream source code.
+- Evaluation: live inference failed (see DESIGN.md §7), so the
+  golden cases were run as a dry run on 31 Oct 2026: 12 pass, 0 fail
+  after one script fix. Transcripts are in
+  `evals/golden/logs/transcripts/`, drafts in
+  `evals/golden/actual_outputs/`, report in
+  `evals/golden/logs/dry-run-report.md`.
+- Input snapshots: frozen in `evals/golden/inputs/` as of each PR's
+  opening timestamp, with proof caveats stated in
+  `evals/golden/inputs/README.md`. Opening diffs for multi-commit
+  PRs could not be proven from commit dates and are flagged there,
+  not silently presented as proven.
+- Action SHA pins: resolved 30 Oct 2026 and present in the workflow.
+- Before submitting: add `ctreude` as a collaborator on the private
+  repository, then submit the link to the frozen commit via eLearn.
 
 ## What the agent does and does not do
 
