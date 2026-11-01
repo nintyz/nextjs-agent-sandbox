@@ -4,7 +4,7 @@
 # the inference step is retained as written, and its failure mode is
 # documented, not hidden. If the endpoint is replaced, the golden
 # cases must be rerun before the new version is relied on.
-# Engine: GitHub Actions (Aaron's decision, 30 Oct 2026). This replaces
+# Engine: GitHub Actions (decided 30 Oct 2026). This replaces
 # Agent 3's GitHub Agentic Workflows draft. There is NO .lock.yml for
 # Actions — see README.md, section "Why there is no .lock.yml".
 #
@@ -156,8 +156,8 @@ jobs:
         id: decide
         if: steps.marker.outputs.marker_present != 'true'
         env:
-          # Inference only: a fine-grained PAT with Models:read, stored
-          # as the MODELS_TOKEN repo secret. The workflow token
+          # Inference only: a fine-grained token with Models:read,
+          # stored as a repo secret. The workflow token
           # returned a plain "OK" body from the inference endpoint in
           # smoke runs #2-#6, so it is not used for this call. All
           # other steps keep using github.token.
