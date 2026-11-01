@@ -15,11 +15,10 @@ description: >
 
 # pr-triage — PR pre-flight and first-pass triage
 
-> DRAFT — Agent 4 (Skill and Scripts Designer), for Marley to merge.
-> Engine: GitHub Actions (Aaron's decision, 30 Oct 2026); this procedure is engine-independent
-> and must be run with exactly these scripts, in this order, in a
-> dry run as well as in the workflow. If the workflow engine cannot
-> run a step, that step is untested, not skipped silently.
+> Engine: GitHub Actions (decided 30 Oct 2026); this procedure is
+> engine-independent and must be run with exactly these scripts, in
+> this order, in a dry run as well as in the workflow. If the workflow
+> engine cannot run a step, that step is untested, not skipped silently.
 
 ## 0. Prove the skill is loaded — before any judgement
 
@@ -79,7 +78,7 @@ noted. A filter decision is logged, never silent:
 - **External PRs:** proceed to §3. This is the primary population.
 - **Draft PRs:** author class any, `draft=true` → NO triage comment
   until `ready_for_review`. Log: `filter: draft PR, no triage comment
-  until ready for review`. (Golden cases: #99784 and #100101, Marley
+  until ready for review`. (Golden cases: #99784 and #100101,
   decision D2, 30 Oct 2026.)
 - **Empty diff:** filter for the live workflow. An external PR with
   an empty diff gets NO comment and a log line
