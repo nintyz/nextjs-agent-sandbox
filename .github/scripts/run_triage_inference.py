@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Narrow inference harness for the Actions triage job (DRAFT).
+"""Narrow inference harness for the Actions triage job.
 
 Workflow-owned base code, NOT skill-owned and NOT PR code. It:
   - reads SKILL.md (fails if unreadable: log 'skill could not be loaded')
